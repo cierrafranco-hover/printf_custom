@@ -1,82 +1,71 @@
 #include "custom_printf.h"
 #include <unistd.h>
-#include <stdlib.h>
 #include <stdarg.h>
 
-int printChar(char c)
+static int printChar(char c)
 {
-    return write(1, &c, 1);
+    return (int)write(1, &c, 1);
 }
 
-int printString(char *str)
+static int printString(char *str)
 {
-    int count = 0;
-
     if (str == NULL)
         str = "(null)";
-
-    while (str[count] != '\0')
-        count++;
-
-    write(1, str, count);
-    return count;
+    int len = 0;
+    while (str[len])
+        len++;
+    return (int)write(1, str, len);
 }
 
-int printNumber(int num)
+static int printNumber(int num)
 {
     char buffer[12];
     int i = 0;
     int count = 0;
-    long n = num;
+    unsigned int u;
 
-    if (n == 0)
+    if (num == 0)
         return printChar('0');
-
-    if (n < 0)
+    if (num < 0)
     {
         count += printChar('-');
-        n = -n;
+        u = (unsigned int)(-(num + 1)) + 1;
     }
-
-    while (n > 0)
+    else
     {
-        buffer[i] = (n % 10) + '0';
-        n /= 10;
+        u = (unsigned int)num;
+    }
+    while (u > 0)
+    {
+        buffer[i] = (u % 10) + '0';
+        u /= 10;
         i++;
     }
-
     while (i > 0)
     {
         i--;
         count += printChar(buffer[i]);
     }
-
     return count;
 }
 
-int printBinary(unsigned int num)
+static int printBinary(unsigned int num)
 {}
 
-int handleSpecifier(char specifier, va_list args)
+static int handleSpecifier(char specifier, va_list *args)
 {
     if (specifier == 'c')
-        return printChar((char)va_arg(args, int));
-
+        return printChar((char)va_arg(*args, int));
     if (specifier == 's')
-        return printString(va_arg(args, char *));
-
+        return printString(va_arg(*args, char *));
     if (specifier == 'd' || specifier == 'i')
-        return printNumber(va_arg(args, int));
-
+        return printNumber(va_arg(*args, int));
     if (specifier == 'b')
-        return printBinary(va_arg(args, unsigned int));
-
+        return printBinary(va_arg(*args, unsigned int));
     if (specifier == '%')
         return printChar('%');
-
     return 0;
 }
 
 int customPrintf(const char *formatString, ...)
-{
-}
+{}
