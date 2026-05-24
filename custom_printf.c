@@ -1,5 +1,4 @@
-#include "custom_printf.h"
-#include <unistd.h>
+#include "custom_printf.h"#include <unistd.h>
 #include <stdarg.h>
 
 static int printChar(char c)
@@ -50,7 +49,18 @@ static int printNumber(int num)
 }
 
 static int printBinary(unsigned int num)
-{}
+{ int count = 0;
+
+    //If number is greater than 1, keep dividing recursively 
+    if (num > 1)
+    {
+        count += printBinary(num / 2);
+    }
+
+    // Print current binary digit 
+    count += printChar((num % 2) + '0');
+
+    return count;}
 
 static int handleSpecifier(char specifier, va_list *args)
 {
@@ -68,4 +78,30 @@ static int handleSpecifier(char specifier, va_list *args)
 }
 
 int customPrintf(const char *formatString, ...)
-{}
+{ va_list args;
+    int i = 0;
+    int count = 0;
+
+    va_start(args, formatString);
+
+    while (formatString[i] != '\0')
+    {
+        if (formatString[i] == '%')
+        {
+            i++;
+
+            /* Handle format specifier */
+            count += handleSpecifier(formatString[i], &args);
+        }
+        else
+        {
+            /* Print regular character */
+            count += printChar(formatString[i]);
+        }
+
+        i++;
+    }
+
+    va_end(args);
+
+    return count;}
